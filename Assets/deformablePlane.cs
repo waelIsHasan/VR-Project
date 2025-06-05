@@ -13,7 +13,6 @@ public class MeshDeformer : MonoBehaviour
     {
         mesh = GetComponent<MeshFilter>().mesh;
         mesh.MarkDynamic(); // Optimize for frequent updates
-        originalVertices = mesh.vertices;
         modifiedVertices = mesh.vertices;
         meshCollider = GetComponent<MeshCollider>();
     }
