@@ -14,24 +14,24 @@ public class MassSpringSphere : MonoBehaviour
     private MassPoint[] massPoints;
     private List<Spring> springs;
 
+    public MassPoint[] GetMassPoints() => massPoints;
+
+    private Vector3 gravity = Physics.gravity;
+
     void Start()
     {
-        // Get mesh and surface vertices
         mesh = GetComponent<MeshFilter>().mesh;
         surfaceVertices = mesh.vertices;
 
-        // Initialize mass points list (surface + interior)
         List<MassPoint> points = new List<MassPoint>();
 
-        // Surface points
         foreach (Vector3 v in surfaceVertices)
         {
-            Vector3 worldPos = transform.TransformPoint(v); // world position
+            Vector3 worldPos = transform.TransformPoint(v);
             points.Add(new MassPoint(worldPos, mass));
         }
 
-        // Interior points
-        float radius = transform.localScale.x * 0.5f; // uniform scale assumed
+        float radius = transform.localScale.x * 0.5f;
         for (float x = -radius; x <= radius; x += internalPointSpacing)
         {
             for (float y = -radius; y <= radius; y += internalPointSpacing)
@@ -50,9 +50,8 @@ public class MassSpringSphere : MonoBehaviour
 
         massPoints = points.ToArray();
 
-        // Create springs
         springs = new List<Spring>();
-        float maxDistance = internalPointSpacing * 1.1f; // neighbor threshold
+        float maxDistance = internalPointSpacing * 1.1f;
 
         for (int i = 0; i < massPoints.Length; i++)
         {
@@ -66,22 +65,17 @@ public class MassSpringSphere : MonoBehaviour
             }
         }
 
-
         Debug.Log("Initialized: " + massPoints.Length + " mass points, " + springs.Count + " springs.");
     }
 
     void FixedUpdate()
     {
-
-        // Reset forces
         foreach (MassPoint p in massPoints)
         {
             p.force = Vector3.zero;
             p.force += gravity * p.mass / 100000;
-
         }
 
-        // Apply spring forces
         foreach (Spring spring in springs)
         {
             MassPoint pA = massPoints[spring.pointA];
@@ -98,7 +92,6 @@ public class MassSpringSphere : MonoBehaviour
             pB.force -= force;
         }
 
-        // Update velocities and positions
         foreach (MassPoint p in massPoints)
         {
             Vector3 acceleration = p.force / p.mass;
@@ -107,7 +100,6 @@ public class MassSpringSphere : MonoBehaviour
             p.position += p.velocity * Time.fixedDeltaTime;
         }
 
-        // Update mesh vertices for surface
         for (int i = 0; i < surfaceVertices.Length; i++)
         {
             Vector3 localPos = transform.InverseTransformPoint(massPoints[i].position);
